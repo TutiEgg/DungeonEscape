@@ -1,0 +1,138 @@
+:root {
+  --batteryValue: 100%;
+  --batteryBackground: #f3c623; 
+  --batteryShadow: 0 0 40px #f3c623;
+  --fill: 100%; 
+}
+
+
+html, body {
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+dialog {
+  text-align: center;
+}
+
+canvas.fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+
+#vui {
+  position: absolute;
+  bottom: 0px;
+  
+  padding: 3px;
+}
+.container {
+  margin: 100px auto;
+  margin-top: 220px;
+  width: 400px;
+  text-align: center;
+  position: relative;
+}
+
+.progress2 {
+  border-radius: 30px;
+  background-color: #fff;
+}
+
+.progress-bar2 {
+  height: 18px;
+  border-radius: 30px;
+  transition: 0.4s linear;
+  transition-property: width, background-color;
+}
+
+.progress-moved .progress-bar2 {
+  width: var(--batteryValue);
+  background: var(--batteryBackground);
+  box-shadow: var(--batteryShadow);
+}
+
+
+.icon {
+color: #f3c623;
+animation: icon 5s infinite;
+background-color: transparent;
+padding-right: 400px;
+padding-bottom: 20px;
+}
+
+@keyframes icon {
+0% {
+  opacity: 0.2;
+  text-shadow: 0 0 0 #f3c623;
+}
+
+}
+.loader {
+  --p: 100;
+  font-size: 2.1em;
+  position: absolute;
+  bottom: 45px;
+  left: 300px;
+  color: #f3c623;
+}
+
+
+
+@keyframes p {
+  90%,
+  100% {
+    --p: 2;
+  }
+}
+
+.health-bar
+{
+    position: fixed;
+    top: 50%;
+    left: 50%;    
+    display: inline-block;
+    
+    margin: -150px -80px;
+}
+
+
+
+.health-bar-glass
+{
+    display: inline-block;
+    width: 150px;
+    height: 16px;
+    z-index: 10;
+    
+    border: 2px solid #000000;
+    box-shadow: inset 0 0 0 2px #dbd75d;
+}
+
+.health-bar-fluid
+{
+    width: var(--fill);
+    height: 100%;
+    
+    background: #d34549;
+    
+    box-shadow: inset 0 3px 0 -1px #d3aa9a, 
+        inset 0 -4px 0 -2px #4d494d, 
+        inset 4px 0 0 -2px #4d494d, 
+        inset -4px 0 0 -2px #4d494d;
+}
+*,
+*:before,
+*:after 
+{
+	box-sizing: inherit;
+}
+
+
+
+
+

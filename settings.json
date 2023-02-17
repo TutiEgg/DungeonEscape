@@ -1,0 +1,12 @@
+{
+    "light_movement_speed": 0.3,                        
+    "player_Protection_Aura":  3 ,
+    "player_Speed_Walk": 2,
+    "player_Speed_Sprint": 3,
+    "enemy_Spawn_Rate":1,
+    "enemy_Speed_Walk": 1,
+    "enemy_Sprint": 1.5,
+    "enemy_Damage": 10,
+    "decreasing_Light_Rate": 1,
+    "increasing_Level_Difficulty": 1
+}
