@@ -61,6 +61,8 @@ declare namespace Dungeon {
         private playerProtectionTime;
         private gettingDamageSound;
         private enemyAttackSound;
+        private pickUpTime;
+        private fill_process;
         constructor();
         hndEvent: (_event: Event) => void;
         update: (_event: Event) => void;
@@ -139,10 +141,22 @@ declare namespace Dungeon {
     function getRandomFloortile(): ƒ.GraphInstance;
     function check_if_player_around(x: number, y: number): boolean;
     function createEnemy(): void;
+    function createItems(): void;
     function searchNewTargetToMove(entityLocation: ƒ.Vector3, _moveDirectionBefore: string): [ƒ.Vector3, string];
     function chooseDirectionToMove(possibleWays: string[], _moveDirectionBefore: string): string;
     function getAllMoveOptions(entityLocation: ƒ.Vector3): string[];
     function placePlayer(): ƒ.Vector3;
+}
+declare namespace Dungeon {
+    import ƒ = FudgeCore;
+    import ƒAid = FudgeAid;
+    class BatteryItem extends ƒAid.NodeSprite {
+        private animIdle;
+        private rigid;
+        constructor(_name: string, _startposition: ƒ.Vector3);
+        initializeAnimations(_imgSpriteSheet: ƒ.TextureImage): Promise<void>;
+        setNewPos(vec: ƒ.Vector3): void;
+    }
 }
 declare namespace Dungeon {
     import ƒ = FudgeCore;
@@ -161,10 +175,14 @@ declare namespace Dungeon {
     let exit_gate: ƒ.Node;
     let parent_of_exitgate: ƒ.Node;
     let imgSpriteSheetEnemy: ƒ.TextureImage;
+    let imgSpriteSheetBattery: ƒ.TextureImage;
     let ENEMYLIST: Enemy[];
+    let BATTERYLIST: BatteryItem[];
     let LEVEL: number;
     let MAYLIGHTAMOUNT: number;
     let MAXENEMYAMOUNT: number;
+    let BATTERYAMOUNT: number;
+    let BATTERYFILLAMOUNT: number;
     let LIGHTMOVEMENTSPEED: number;
     let PLAYERPROTECTIONAURA: number;
     let PLAYERSPEEDWALK: number;

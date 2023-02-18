@@ -183,6 +183,30 @@ namespace Dungeon {
         }
       }
 
+      export function createItems(): void {
+        
+        // Get graph battery
+        let items_graph = graph.getChildrenByName("Items")[0];
+        //let battery_graph = items_graph.getChildrenByName("Batterys")[0];
+        console.log(items_graph)
+        if (BATTERYAMOUNT > 0)  {
+          
+          
+          for (let i = 0; i < BATTERYAMOUNT; i++) {
+            let rndFloor: ƒ.GraphInstance = getRandomFloortile()
+
+            let parent_col: ƒ.Node = rndFloor.getParent(); // X
+            let parent_row: ƒ.Node = parent_col.getParent(); //Y
+            let new_vec_pos: ƒ.Vector3 = new ƒ.Vector3(parent_col.mtxLocal.translation.x, parent_row.mtxLocal.translation.y, 0.5)
+
+            let bat: BatteryItem = new BatteryItem(`Battery_${i}`, new_vec_pos);
+            bat.initializeAnimations(imgSpriteSheetBattery);
+            BATTERYLIST.push(bat);
+            items_graph.addChild(bat);
+          }
+        }
+      }
+
       export function searchNewTargetToMove(entityLocation: ƒ.Vector3, _moveDirectionBefore: string): [ƒ.Vector3, string] {
         let possibleWays: string[] = getAllMoveOptions(entityLocation);
         let choosenDirection: string = chooseDirectionToMove(possibleWays, _moveDirectionBefore);

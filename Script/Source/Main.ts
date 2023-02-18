@@ -34,13 +34,17 @@ namespace Dungeon {
   export let parent_of_exitgate: ƒ.Node;
 
   export let imgSpriteSheetEnemy: ƒ.TextureImage = new ƒ.TextureImage();
+  export let imgSpriteSheetBattery: ƒ.TextureImage = new ƒ.TextureImage();
 
   export let ENEMYLIST: Enemy[] = [];
+  export let BATTERYLIST: BatteryItem[] = [];
 
   // Global Variables which cant be set in settings.json (Standard)
   export let LEVEL: number = 1
   export let MAYLIGHTAMOUNT:number = 100;
   export let MAXENEMYAMOUNT:number = 10;
+  export let BATTERYAMOUNT:number = 2;
+  export let BATTERYFILLAMOUNT:number = 50;
   
   // Variables set in Settings. Here are default values
   export let LIGHTMOVEMENTSPEED:number = 0.3;                         // How fast the light changes the direction
@@ -78,6 +82,7 @@ namespace Dungeon {
     await imgSpriteSheet.load("./Assets/Sprite/character_sprite.png");
     //await imgSpriteSheet.load("./Assets/Sprite/avatar_sprite.png");
     await imgSpriteSheetEnemy.load("./Assets/Sprite/enemy_sprite_new.png");
+    await imgSpriteSheetBattery.load("./Assets/Items/Battery.png");
 
     // Create graph
     graph = viewport.getBranch();
@@ -264,6 +269,8 @@ namespace Dungeon {
     createEnemy();
 
     // Create and postiion Items
+
+    createItems();
   
   }
 // Reset all global-Variables
@@ -280,6 +287,10 @@ function resetLevel(): void {
   // Delete Enemys
   let enemy_graph: ƒ.Node = graph.getChildrenByName("Enemys")[0];
   enemy_graph.removeAllChildren();
+  ENEMYLIST = []
+  BATTERYLIST = []
+  let battery_graph: ƒ.Node = graph.getChildrenByName("Items")[0];
+  battery_graph.removeAllChildren();
   // Delete Items
   // Remove ExitGate
   setExitGate()
@@ -296,6 +307,7 @@ export function nextLevel(): void {
   LEVEL += 1;
   
   createEnemy();
+  createItems();
   //setExitGate();
 
 }

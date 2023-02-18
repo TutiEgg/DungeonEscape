@@ -21,7 +21,7 @@ namespace Dungeon {
     private lightStepValue: number = Math.round(100/(5-2))
     public lightPercentage: number;
 
-    private lightUpdateFrequency: number = 100; // Milliseconds
+    private lightUpdateFrequency: number = 200; // Milliseconds
     private timeOfLastUpdate: Date;
     private lightDecreaseValue: number = 0.001;
 
@@ -34,6 +34,9 @@ namespace Dungeon {
     // Sound variablees
     private gettingDamageSound:  ƒ.ComponentAudio;
     private enemyAttackSound:  ƒ.ComponentAudio;
+
+    private pickUpTime: Date;
+    private fill_process = true;
 
    
 
@@ -82,6 +85,7 @@ namespace Dungeon {
           // Set time
           this.timeOfLastUpdate = new Date();
           this.timeOfLastDamageTaken = new Date();
+          this.pickUpTime = new Date();
 
           // Set VUI
           this.gameState = new GameState();
@@ -145,6 +149,46 @@ namespace Dungeon {
                 resetGame(false)
               }
               
+            } else if(collision_obj.collisionGroup == ƒ.COLLISION_GROUP.GROUP_3) {
+              // Move Battery 
+
+              let rndFloor: ƒ.GraphInstance = getRandomFloortile()
+
+              let parent_col: ƒ.Node = rndFloor.getParent(); // X
+              let parent_row: ƒ.Node = parent_col.getParent(); //Y
+              let new_vec_pos: ƒ.Vector3 = new ƒ.Vector3(parent_col.mtxLocal.translation.x, parent_row.mtxLocal.translation.y, 0.5)
+
+              collision_obj.node.mtxLocal.translation = new_vec_pos;
+              
+              let new_battery: number = BATTERYFILLAMOUNT + this.gameState.getBatteryValue() 
+              if (new_battery >= 100) {
+                new_battery = 99;
+              }
+              //this.gameState.updateBattery(new_battery);
+              // Optimize this area
+              if (this.dateBetween(this.pickUpTime, dateTime) >= 2000) {
+                this.fill_process = true
+              }
+              if (this.fill_process) {
+                this.pickUpTime = dateTime
+                let percentage_value = 2 + (new_battery/100) * 3
+                let light_inc = this.mtx_light.translation.z - percentage_value
+
+                
+                this.mtx_light.translateZ(light_inc/10);
+                
+                this.gameState.updateBattery(new_battery);
+                this.fill_process = false
+              }
+              
+              
+
+              
+              // 
+              
+              // Battery deletefg
+              // Add Battery to playerlight 
+              // Add Battery in VUI
             }
           }
          // console.log("Collisonssss", collison_rigid.collisionGroup)
@@ -159,6 +203,7 @@ namespace Dungeon {
           let rounded_value = Math.round(this.mtx_light.translation.z * 10) / 10 
           let percentage_value = 99 - Math.round( (this.maxLightPercentage-rounded_value) * this.lightStepValue *10 ) / 10 
           this.gameState.updateBattery(percentage_value);
+          //console.log(this.mtx_light.translation.z)
         }
         this.timeOfLastUpdate = dateTime;
       }    

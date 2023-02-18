@@ -209,7 +209,7 @@ var Dungeon;
         maxLightPercentage = 5;
         lightStepValue = Math.round(100 / (5 - 2));
         lightPercentage;
-        lightUpdateFrequency = 100; // Milliseconds
+        lightUpdateFrequency = 200; // Milliseconds
         timeOfLastUpdate;
         lightDecreaseValue = 0.001;
         // Player Variables
@@ -220,6 +220,8 @@ var Dungeon;
         // Sound variablees
         gettingDamageSound;
         enemyAttackSound;
+        pickUpTime;
+        fill_process = true;
         constructor() {
             super();
             // Don't start when running in editor
@@ -256,6 +258,7 @@ var Dungeon;
                     // Set time
                     this.timeOfLastUpdate = new Date();
                     this.timeOfLastDamageTaken = new Date();
+                    this.pickUpTime = new Date();
                     // Set VUI
                     this.gameState = new Dungeon.GameState();
                     // Set Audio
@@ -306,6 +309,35 @@ var Dungeon;
                                 Dungeon.resetGame(false);
                             }
                         }
+                        else if (collision_obj.collisionGroup == ƒ.COLLISION_GROUP.GROUP_3) {
+                            // Move Battery 
+                            let rndFloor = Dungeon.getRandomFloortile();
+                            let parent_col = rndFloor.getParent(); // X
+                            let parent_row = parent_col.getParent(); //Y
+                            let new_vec_pos = new ƒ.Vector3(parent_col.mtxLocal.translation.x, parent_row.mtxLocal.translation.y, 0.5);
+                            collision_obj.node.mtxLocal.translation = new_vec_pos;
+                            let new_battery = Dungeon.BATTERYFILLAMOUNT + this.gameState.getBatteryValue();
+                            if (new_battery >= 100) {
+                                new_battery = 99;
+                            }
+                            //this.gameState.updateBattery(new_battery);
+                            // Optimize this area
+                            if (this.dateBetween(this.pickUpTime, dateTime) >= 2000) {
+                                this.fill_process = true;
+                            }
+                            if (this.fill_process) {
+                                this.pickUpTime = dateTime;
+                                let percentage_value = 2 + (new_battery / 100) * 3;
+                                let light_inc = this.mtx_light.translation.z - percentage_value;
+                                this.mtx_light.translateZ(light_inc / 10);
+                                this.gameState.updateBattery(new_battery);
+                                this.fill_process = false;
+                            }
+                            // 
+                            // Battery deletefg
+                            // Add Battery to playerlight 
+                            // Add Battery in VUI
+                        }
                     }
                     // console.log("Collisonssss", collison_rigid.collisionGroup)
                 }
@@ -318,6 +350,7 @@ var Dungeon;
                     let rounded_value = Math.round(this.mtx_light.translation.z * 10) / 10;
                     let percentage_value = 99 - Math.round((this.maxLightPercentage - rounded_value) * this.lightStepValue * 10) / 10;
                     this.gameState.updateBattery(percentage_value);
+                    //console.log(this.mtx_light.translation.z)
                 }
                 this.timeOfLastUpdate = dateTime;
             }
@@ -779,6 +812,25 @@ var Dungeon;
         }
     }
     Dungeon.createEnemy = createEnemy;
+    function createItems() {
+        // Get graph battery
+        let items_graph = Dungeon.graph.getChildrenByName("Items")[0];
+        //let battery_graph = items_graph.getChildrenByName("Batterys")[0];
+        console.log(items_graph);
+        if (Dungeon.BATTERYAMOUNT > 0) {
+            for (let i = 0; i < Dungeon.BATTERYAMOUNT; i++) {
+                let rndFloor = getRandomFloortile();
+                let parent_col = rndFloor.getParent(); // X
+                let parent_row = parent_col.getParent(); //Y
+                let new_vec_pos = new ƒ.Vector3(parent_col.mtxLocal.translation.x, parent_row.mtxLocal.translation.y, 0.5);
+                let bat = new Dungeon.BatteryItem(`Battery_${i}`, new_vec_pos);
+                bat.initializeAnimations(Dungeon.imgSpriteSheetBattery);
+                Dungeon.BATTERYLIST.push(bat);
+                items_graph.addChild(bat);
+            }
+        }
+    }
+    Dungeon.createItems = createItems;
     function searchNewTargetToMove(entityLocation, _moveDirectionBefore) {
         let possibleWays = getAllMoveOptions(entityLocation);
         let choosenDirection = chooseDirectionToMove(possibleWays, _moveDirectionBefore);
@@ -852,6 +904,41 @@ var Dungeon;
     }
     Dungeon.placePlayer = placePlayer;
 })(Dungeon || (Dungeon = {}));
+var Dungeon;
+(function (Dungeon) {
+    var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
+    class BatteryItem extends ƒAid.NodeSprite {
+        animIdle;
+        rigid;
+        constructor(_name = "Battery", _startposition) {
+            super("AvatarInstance");
+            // Initialize private Values
+            this.name = _name;
+            this.addComponent(new ƒ.ComponentTransform()); // Add tranformation component,for translations
+            this.mtxLocal.translation = _startposition; // Start Position of Enemy
+            // Add Rigidbody
+            let mt = new ƒ.Matrix4x4();
+            mt.scale(new ƒ.Vector3(0.7, 0.7, 10));
+            this.rigid = new ƒ.ComponentRigidbody(0, ƒ.BODY_TYPE.KINEMATIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.GROUP_3, mt);
+            this.rigid.isTrigger = true;
+            this.rigid.mtxPivot = mt;
+            this.addComponent(this.rigid);
+        }
+        async initializeAnimations(_imgSpriteSheet) {
+            let coat = new ƒ.CoatTextured(undefined, _imgSpriteSheet);
+            this.animIdle = new ƒAid.SpriteSheetAnimation("Idle", coat);
+            this.animIdle.generateByGrid(ƒ.Rectangle.GET(0, 16, 16, 16), 1, 32, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(16));
+            this.setAnimation(this.animIdle);
+            this.framerate = 20;
+        }
+        setNewPos(vec) {
+            this.mtxLocal.translation = vec;
+        }
+    }
+    Dungeon.BatteryItem = BatteryItem;
+    ƒAid.StateMachine;
+})(Dungeon || (Dungeon = {}));
 /*
  Collider-groups
  Default = Player
@@ -883,11 +970,15 @@ var Dungeon;
     Dungeon.xValue = 0; // x-Value of Light
     Dungeon.yValue = 180; // y-Value of Light
     Dungeon.imgSpriteSheetEnemy = new ƒ.TextureImage();
+    Dungeon.imgSpriteSheetBattery = new ƒ.TextureImage();
     Dungeon.ENEMYLIST = [];
+    Dungeon.BATTERYLIST = [];
     // Global Variables which cant be set in settings.json (Standard)
     Dungeon.LEVEL = 1;
     Dungeon.MAYLIGHTAMOUNT = 100;
     Dungeon.MAXENEMYAMOUNT = 10;
+    Dungeon.BATTERYAMOUNT = 2;
+    Dungeon.BATTERYFILLAMOUNT = 50;
     // Variables set in Settings. Here are default values
     Dungeon.LIGHTMOVEMENTSPEED = 0.3; // How fast the light changes the direction
     Dungeon.PLAYERPROTECTIONAURA = 3; // radius of proteaction around the player. No enemy, items, exitgate can spawn in this area
@@ -913,6 +1004,7 @@ var Dungeon;
         await imgSpriteSheet.load("./Assets/Sprite/character_sprite.png");
         //await imgSpriteSheet.load("./Assets/Sprite/avatar_sprite.png");
         await Dungeon.imgSpriteSheetEnemy.load("./Assets/Sprite/enemy_sprite_new.png");
+        await Dungeon.imgSpriteSheetBattery.load("./Assets/Items/Battery.png");
         // Create graph
         Dungeon.graph = Dungeon.viewport.getBranch();
         // Create Character
@@ -1064,6 +1156,7 @@ var Dungeon;
         // Create and position Enemys
         Dungeon.createEnemy();
         // Create and postiion Items
+        Dungeon.createItems();
     }
     // Reset all global-Variables
     function resetGame(won) {
@@ -1080,6 +1173,10 @@ var Dungeon;
         // Delete Enemys
         let enemy_graph = Dungeon.graph.getChildrenByName("Enemys")[0];
         enemy_graph.removeAllChildren();
+        Dungeon.ENEMYLIST = [];
+        Dungeon.BATTERYLIST = [];
+        let battery_graph = Dungeon.graph.getChildrenByName("Items")[0];
+        battery_graph.removeAllChildren();
         // Delete Items
         // Remove ExitGate
         Dungeon.setExitGate();
@@ -1091,6 +1188,7 @@ var Dungeon;
         resetLevel();
         Dungeon.LEVEL += 1;
         Dungeon.createEnemy();
+        Dungeon.createItems();
         //setExitGate();
     }
     Dungeon.nextLevel = nextLevel;
