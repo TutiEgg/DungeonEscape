@@ -18,6 +18,7 @@ namespace Dungeon {
           setup.actDefault = EnemyStateMachine.actDefault;
           setup.setAction(EnemyState.IDLE, <ƒ.General>this.actIdle);
           setup.setAction(EnemyState.PATROL, <ƒ.General>this.actPatrol);
+          setup.setAction(EnemyState.ATTACK, <ƒ.General>this.actAttack);
 
           return setup;
         }
@@ -32,17 +33,31 @@ namespace Dungeon {
         }
     
         private static async actIdle(_machine: EnemyStateMachine): Promise<void> {
-          
+          // Cant Happen, otherwise the enemy is stuck in place
           console.log("ENEMY Idle")
           
         }
         
         private static async actPatrol(_machine: EnemyStateMachine): Promise<void> {
-          let container: Enemy = <Enemy>(<ƒAid.ComponentStateMachine<EnemyState>>_machine).getContainer();
+          let enemy_node : ƒ.Node;
+          enemy_node  = _machine.node
+          
+          // Shows Error. Convert enemy_node to type of Enemy ?
+          enemy_node.move(deltaTime);
+          
+         
+          
+        }
+
+        private static async actAttack(_machine: EnemyStateMachine): Promise<void> {
+          //let container: Enemy = <Enemy>(<ƒAid.ComponentStateMachine<EnemyState>>_machine).getContainer();
           //let container: Enemy = <Enemy>(_machine).getContainer;
-         
-         
-          console.log("ENEMY PATRROL", container)
+          let enemy_node : ƒ.Node;
+          enemy_node  = _machine.node
+          enemy_node.attack()
+
+
+          
          
           
         }

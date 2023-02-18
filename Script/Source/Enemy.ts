@@ -3,10 +3,13 @@ namespace Dungeon {
     import ƒAid = FudgeAid;
 
     export enum EnemyState {
-        IDLE, PATROL,CHASE,FREEZE
+        IDLE, PATROL,ATTACK
     }
 
     export class Enemy extends ƒAid.NodeSprite {
+
+        private rigid_enemy: ƒ.ComponentRigidbody;
+        private cmpStateMachine: EnemyStateMachine;
         
         private moveTarget: ƒ.Vector3;
         private moveDirection: string = "Up";
@@ -29,7 +32,10 @@ namespace Dungeon {
         private animAttackUp: ƒAid.SpriteSheetAnimation;
         private animAttackDown: ƒAid.SpriteSheetAnimation;
 
-        private EnemyAttackSound: ƒ.ComponentAudio;
+        private enemyAttackSound: ƒ.ComponentAudio;
+
+        
+
         
 
         public constructor(_name: string = "Enemy", _startposition: ƒ.Vector3, _damage: number, _walkspeed: number, _sprintspeed: number) {
@@ -51,38 +57,77 @@ namespace Dungeon {
             [this.moveTarget, this.moveDirection] = searchNewTargetToMove(this.mtxLocal.translation, "None");
 
             // Add EnemyStateMachine
-            let cmpStateMachine: EnemyStateMachine = new EnemyStateMachine();
-            this.addComponent(cmpStateMachine);
-            cmpStateMachine.stateCurrent = EnemyState.PATROL;
+            this.cmpStateMachine = new EnemyStateMachine();
+            this.addComponent(this.cmpStateMachine);
+            this.cmpStateMachine.stateCurrent = EnemyState.PATROL;
             
             // Add Rigidbody
             let mt: ƒ.Matrix4x4 = new ƒ.Matrix4x4()
             mt.scale(new ƒ.Vector3(0.7, 0.7, 10));
                       
-            let rigid_enemy: ƒ.ComponentRigidbody = new ƒ.ComponentRigidbody(0, ƒ.BODY_TYPE.KINEMATIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.GROUP_2, mt);
-            rigid_enemy.isTrigger = true;
-            rigid_enemy.mtxPivot = mt;
+            this.rigid_enemy = new ƒ.ComponentRigidbody(0, ƒ.BODY_TYPE.KINEMATIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.GROUP_2, mt);
+            this.rigid_enemy.isTrigger = true;
+            this.rigid_enemy.mtxPivot = mt;
+
+            // Add SOund
+            let enemyAttack :ƒ.Audio = new ƒ.Audio("./Sound/enemy_attack.mp3");
+            this.enemyAttackSound = new ƒ.ComponentAudio(enemyAttack);
+            this.enemyAttackSound.volume = 0.5;
+            this.addComponent(this.enemyAttackSound);
             
             //console.log("nachj", rigid_enemy.getScaling().x)
-            this.addComponent(rigid_enemy);
+            this.addComponent(this.rigid_enemy);
                 
         }
 
         public update(deltaTime: number): void {
-            this.move(deltaTime)
+            // Movement through EnemyStateMachine+
+            if (this.checkCollisionsenemy()) {
+
+            } else {
+                if (this.cmpStateMachine.stateCurrent != EnemyState.PATROL) {
+                    this.cmpStateMachine.transit(EnemyState.PATROL)
+                }
+            }
             
-            
-            // TODO: Über StateMachine die Bewegung handeln
-            //this.getComponent(EnemyStateMachine).act();
+            this.getComponent(EnemyStateMachine).act();
             //this.displayAnimation();
+            
         }
 
-        public test(): number {
-            return 2
+        public checkCollisionsenemy(): boolean {
+            if (this.rigid_enemy.collisions.length != 0 ) {
+                let collison_list =  this.rigid_enemy.collisions
+                
+                // Check Collisions
+               
+                if (collison_list){
+                  for (let collision_index in collison_list){
+                    let collision_obj: ƒ.ComponentRigidbody = collison_list[collision_index];
+                    
+                    if(collision_obj.collisionGroup == ƒ.COLLISION_GROUP.DEFAULT) {
+                        if (!this.enemyAttackSound.isPlaying) {
+                            this.enemyAttackSound.play(true);
+                            //this.cmpStateMachine.stateCurrent = EnemyState.ATTACK;
+                            this.cmpStateMachine.transit(EnemyState.ATTACK)
+                        }     
+                    } 
+                  }
+                  return true
+                 // console.log("Collisonssss", collison_rigid.collisionGroup)
+                } else {
+                    return false
+                }
+                
+            } else {
+                return false
+            }
         }
+
         
 
         public move(deltaTime: number): void {
+            
             let animation: ƒAid.SpriteSheetAnimation;
 
             let enemyLocation: ƒ.Vector3 = this.mtxLocal.translation
@@ -134,6 +179,26 @@ namespace Dungeon {
             
         }
 
+        public attack(): void {
+            let animation: ƒAid.SpriteSheetAnimation;
+            if (this.moveDirection == "Left") {
+                animation = this.animAttackLeft;
+            } else if (this.moveDirection == "Right") {
+                animation = this.animAttackRight;
+            } else if (this.moveDirection == "Down") {
+                animation = this.animAttackDown;
+            } else if (this.moveDirection == "Up") {
+                animation = this.animAttackUp;
+            } else {
+                console.log("ERROR: ", this.name ," is stuck !")
+            }
+
+            if (animation != this.animationCurrent) {
+                this.setAnimation(animation);
+                this.animationCurrent = animation;
+            }
+        }
+
         public async initializeAnimations(_imgSpriteSheet: ƒ.TextureImage): Promise<void> {
             let coat: ƒ.CoatTextured = new ƒ.CoatTextured(undefined, _imgSpriteSheet);
     
@@ -150,7 +215,7 @@ namespace Dungeon {
             this.animAttackRight = new ƒAid.SpriteSheetAnimation("AttackRight", coat);
             this.animAttackRight.generateByGrid(ƒ.Rectangle.GET(0,640, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackLeft = new ƒAid.SpriteSheetAnimation("AttackLeft", coat);
-            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 0, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
+            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 128, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackUp = new ƒAid.SpriteSheetAnimation("AttackUp", coat);
             this.animAttackUp.generateByGrid(ƒ.Rectangle.GET(0, 896, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackDown = new ƒAid.SpriteSheetAnimation("AttackDown", coat);

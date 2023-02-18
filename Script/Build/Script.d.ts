@@ -74,10 +74,11 @@ declare namespace Dungeon {
     enum EnemyState {
         IDLE = 0,
         PATROL = 1,
-        CHASE = 2,
-        FREEZE = 3
+        ATTACK = 2
     }
     class Enemy extends ƒAid.NodeSprite {
+        private rigid_enemy;
+        private cmpStateMachine;
         private moveTarget;
         private moveDirection;
         private enemyPosBefore;
@@ -94,11 +95,12 @@ declare namespace Dungeon {
         private animAttackLeft;
         private animAttackUp;
         private animAttackDown;
-        private EnemyAttackSound;
+        private enemyAttackSound;
         constructor(_name: string, _startposition: ƒ.Vector3, _damage: number, _walkspeed: number, _sprintspeed: number);
         update(deltaTime: number): void;
-        test(): number;
+        checkCollisionsenemy(): boolean;
         move(deltaTime: number): void;
+        attack(): void;
         initializeAnimations(_imgSpriteSheet: ƒ.TextureImage): Promise<void>;
     }
 }
@@ -113,6 +115,7 @@ declare namespace Dungeon {
         private static actDefault;
         private static actIdle;
         private static actPatrol;
+        private static actAttack;
     }
 }
 declare namespace Dungeon {
@@ -172,6 +175,7 @@ declare namespace Dungeon {
     let ENEMYDAMAGE: number;
     let DECREASINGLIGHTRATE: number;
     let INCREASINGLEVELDIFFICULTY: number;
+    let deltaTime: number;
     function resetGame(won: boolean): void;
     function nextLevel(): void;
 }

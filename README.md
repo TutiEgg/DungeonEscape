@@ -32,6 +32,7 @@
 ## How to Use
 Die Steuerung ist mit den WASD-Tasten möglich, durch zusätzliches drücken der SHIFT-Taste kann der Charakter sprinten.
 Nach einem Reload der Seite nicht sofort auf Start klicken !
+Bei Kontakt mit Gegnern wird dem Spieler schaden zugefügt. Das Licht nimmt mit der Zeit an stärke ab. Ab jedem Level wird der Schwierigkeitsgrad höher.
 
 
 ## Features

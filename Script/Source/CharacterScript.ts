@@ -92,10 +92,6 @@ namespace Dungeon {
           this.gettingDamageSound.volume = 0.5;
           this.node.addComponent(this.gettingDamageSound);
 
-          let enemyAttack :ƒ.Audio = new ƒ.Audio("./Sound/enemy_attack.mp3");
-          this.enemyAttackSound = new ƒ.ComponentAudio(enemyAttack);
-          this.enemyAttackSound.volume = 0.5;
-          this.node.addComponent(this.enemyAttackSound);
 
           this.node.addEventListener(ƒ.EVENT.RENDER_PREPARE, this.update);
           
@@ -141,11 +137,7 @@ namespace Dungeon {
                 if (!this.gettingDamageSound.isPlaying) {
                   this.gettingDamageSound.play(true);
                 }
-                if (!this.enemyAttackSound.isPlaying) {
-                  this.enemyAttackSound.play(true);
-                }
-                
-                
+          
                 this.timeOfLastDamageTaken = dateTime;
               }
               if (this.playerhealthAmount <= 0){

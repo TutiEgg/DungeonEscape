@@ -55,6 +55,7 @@ namespace Dungeon {
 
   export let DECREASINGLIGHTRATE: number = 1;
   export let INCREASINGLEVELDIFFICULTY: number = 1;
+  export let deltaTime: number;
 
   let MOVEMENTCOMPONENTSOUND: ƒ.ComponentAudio;
   let DUNGEONCOMPONENTSOUND: ƒ.ComponentAudio;
@@ -131,7 +132,7 @@ namespace Dungeon {
 
   // Game time
   function update(_event: Event): void {
-    let deltaTime: number = ƒ.Loop.timeFrameGame / 1000;
+    deltaTime = ƒ.Loop.timeFrameGame / 1000;
     
     let run: boolean = ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]);
 

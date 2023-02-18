@@ -263,10 +263,6 @@ var Dungeon;
                     this.gettingDamageSound = new ƒ.ComponentAudio(damageSound);
                     this.gettingDamageSound.volume = 0.5;
                     this.node.addComponent(this.gettingDamageSound);
-                    let enemyAttack = new ƒ.Audio("./Sound/enemy_attack.mp3");
-                    this.enemyAttackSound = new ƒ.ComponentAudio(enemyAttack);
-                    this.enemyAttackSound.volume = 0.5;
-                    this.node.addComponent(this.enemyAttackSound);
                     this.node.addEventListener("renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */, this.update);
                     break;
                 case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
@@ -302,9 +298,6 @@ var Dungeon;
                                 // Sound
                                 if (!this.gettingDamageSound.isPlaying) {
                                     this.gettingDamageSound.play(true);
-                                }
-                                if (!this.enemyAttackSound.isPlaying) {
-                                    this.enemyAttackSound.play(true);
                                 }
                                 this.timeOfLastDamageTaken = dateTime;
                             }
@@ -352,10 +345,11 @@ var Dungeon;
     (function (EnemyState) {
         EnemyState[EnemyState["IDLE"] = 0] = "IDLE";
         EnemyState[EnemyState["PATROL"] = 1] = "PATROL";
-        EnemyState[EnemyState["CHASE"] = 2] = "CHASE";
-        EnemyState[EnemyState["FREEZE"] = 3] = "FREEZE";
+        EnemyState[EnemyState["ATTACK"] = 2] = "ATTACK";
     })(EnemyState = Dungeon.EnemyState || (Dungeon.EnemyState = {}));
     class Enemy extends ƒAid.NodeSprite {
+        rigid_enemy;
+        cmpStateMachine;
         moveTarget;
         moveDirection = "Up";
         enemyPosBefore;
@@ -372,7 +366,7 @@ var Dungeon;
         animAttackLeft;
         animAttackUp;
         animAttackDown;
-        EnemyAttackSound;
+        enemyAttackSound;
         constructor(_name = "Enemy", _startposition, _damage, _walkspeed, _sprintspeed) {
             super("AvatarInstance");
             // Initialize private Values
@@ -387,26 +381,60 @@ var Dungeon;
             // Search first Target to move
             [this.moveTarget, this.moveDirection] = Dungeon.searchNewTargetToMove(this.mtxLocal.translation, "None");
             // Add EnemyStateMachine
-            let cmpStateMachine = new Dungeon.EnemyStateMachine();
-            this.addComponent(cmpStateMachine);
-            cmpStateMachine.stateCurrent = EnemyState.PATROL;
+            this.cmpStateMachine = new Dungeon.EnemyStateMachine();
+            this.addComponent(this.cmpStateMachine);
+            this.cmpStateMachine.stateCurrent = EnemyState.PATROL;
             // Add Rigidbody
             let mt = new ƒ.Matrix4x4();
             mt.scale(new ƒ.Vector3(0.7, 0.7, 10));
-            let rigid_enemy = new ƒ.ComponentRigidbody(0, ƒ.BODY_TYPE.KINEMATIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.GROUP_2, mt);
-            rigid_enemy.isTrigger = true;
-            rigid_enemy.mtxPivot = mt;
+            this.rigid_enemy = new ƒ.ComponentRigidbody(0, ƒ.BODY_TYPE.KINEMATIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.GROUP_2, mt);
+            this.rigid_enemy.isTrigger = true;
+            this.rigid_enemy.mtxPivot = mt;
+            // Add SOund
+            let enemyAttack = new ƒ.Audio("./Sound/enemy_attack.mp3");
+            this.enemyAttackSound = new ƒ.ComponentAudio(enemyAttack);
+            this.enemyAttackSound.volume = 0.5;
+            this.addComponent(this.enemyAttackSound);
             //console.log("nachj", rigid_enemy.getScaling().x)
-            this.addComponent(rigid_enemy);
+            this.addComponent(this.rigid_enemy);
         }
         update(deltaTime) {
-            this.move(deltaTime);
-            // TODO: Über StateMachine die Bewegung handeln
-            //this.getComponent(EnemyStateMachine).act();
+            // Movement through EnemyStateMachine+
+            if (this.checkCollisionsenemy()) {
+            }
+            else {
+                if (this.cmpStateMachine.stateCurrent != EnemyState.PATROL) {
+                    this.cmpStateMachine.transit(EnemyState.PATROL);
+                }
+            }
+            this.getComponent(Dungeon.EnemyStateMachine).act();
             //this.displayAnimation();
         }
-        test() {
-            return 2;
+        checkCollisionsenemy() {
+            if (this.rigid_enemy.collisions.length != 0) {
+                let collison_list = this.rigid_enemy.collisions;
+                // Check Collisions
+                if (collison_list) {
+                    for (let collision_index in collison_list) {
+                        let collision_obj = collison_list[collision_index];
+                        if (collision_obj.collisionGroup == ƒ.COLLISION_GROUP.DEFAULT) {
+                            if (!this.enemyAttackSound.isPlaying) {
+                                this.enemyAttackSound.play(true);
+                                //this.cmpStateMachine.stateCurrent = EnemyState.ATTACK;
+                                this.cmpStateMachine.transit(EnemyState.ATTACK);
+                            }
+                        }
+                    }
+                    return true;
+                    // console.log("Collisonssss", collison_rigid.collisionGroup)
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
         }
         move(deltaTime) {
             let animation;
@@ -458,6 +486,28 @@ var Dungeon;
                 this.animationCurrent = animation;
             }
         }
+        attack() {
+            let animation;
+            if (this.moveDirection == "Left") {
+                animation = this.animAttackLeft;
+            }
+            else if (this.moveDirection == "Right") {
+                animation = this.animAttackRight;
+            }
+            else if (this.moveDirection == "Down") {
+                animation = this.animAttackDown;
+            }
+            else if (this.moveDirection == "Up") {
+                animation = this.animAttackUp;
+            }
+            else {
+                console.log("ERROR: ", this.name, " is stuck !");
+            }
+            if (animation != this.animationCurrent) {
+                this.setAnimation(animation);
+                this.animationCurrent = animation;
+            }
+        }
         async initializeAnimations(_imgSpriteSheet) {
             let coat = new ƒ.CoatTextured(undefined, _imgSpriteSheet);
             this.animWalkRight = new ƒAid.SpriteSheetAnimation("WalkRight", coat);
@@ -471,7 +521,7 @@ var Dungeon;
             this.animAttackRight = new ƒAid.SpriteSheetAnimation("AttackRight", coat);
             this.animAttackRight.generateByGrid(ƒ.Rectangle.GET(0, 640, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackLeft = new ƒAid.SpriteSheetAnimation("AttackLeft", coat);
-            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 0, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
+            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 128, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackUp = new ƒAid.SpriteSheetAnimation("AttackUp", coat);
             this.animAttackUp.generateByGrid(ƒ.Rectangle.GET(0, 896, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackDown = new ƒAid.SpriteSheetAnimation("AttackDown", coat);
@@ -499,6 +549,7 @@ var Dungeon;
             setup.actDefault = EnemyStateMachine.actDefault;
             setup.setAction(Dungeon.EnemyState.IDLE, this.actIdle);
             setup.setAction(Dungeon.EnemyState.PATROL, this.actPatrol);
+            setup.setAction(Dungeon.EnemyState.ATTACK, this.actAttack);
             return setup;
         }
         static transitDefault(_machine) {
@@ -508,12 +559,21 @@ var Dungeon;
             console.log(Dungeon.EnemyState[_machine.stateCurrent]);
         }
         static async actIdle(_machine) {
+            // Cant Happen, otherwise the enemy is stuck in place
             console.log("ENEMY Idle");
         }
         static async actPatrol(_machine) {
-            let container = _machine.getContainer();
+            let enemy_node;
+            enemy_node = _machine.node;
+            // Shows Error. Convert enemy_node to type of Enemy ?
+            enemy_node.move(Dungeon.deltaTime);
+        }
+        static async actAttack(_machine) {
+            //let container: Enemy = <Enemy>(<ƒAid.ComponentStateMachine<EnemyState>>_machine).getContainer();
             //let container: Enemy = <Enemy>(_machine).getContainer;
-            console.log("ENEMY PATRROL", container);
+            let enemy_node;
+            enemy_node = _machine.node;
+            enemy_node.attack();
         }
     }
     Dungeon.EnemyStateMachine = EnemyStateMachine;
@@ -891,7 +951,7 @@ var Dungeon;
     }
     // Game time
     function update(_event) {
-        let deltaTime = ƒ.Loop.timeFrameGame / 1000;
+        Dungeon.deltaTime = ƒ.Loop.timeFrameGame / 1000;
         let run = ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]);
         // Check for key presses
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A, ƒ.KEYBOARD_CODE.ARROW_LEFT])) {
@@ -958,10 +1018,10 @@ var Dungeon;
         ƒ.Physics.simulate(ƒ.Loop.timeFrameReal / 1000);
         //checkCollision(MAP_TILES);
         // Update Character
-        Dungeon.avatar.update(deltaTime);
+        Dungeon.avatar.update(Dungeon.deltaTime);
         // Update Enemys
         for (let enemy of Dungeon.ENEMYLIST) {
-            enemy.update(deltaTime);
+            enemy.update(Dungeon.deltaTime);
         }
         Dungeon.viewport.draw();
         //ƒ.AudioManager.default.update();
