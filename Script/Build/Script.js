@@ -521,7 +521,7 @@ var Dungeon;
             this.animAttackRight = new ƒAid.SpriteSheetAnimation("AttackRight", coat);
             this.animAttackRight.generateByGrid(ƒ.Rectangle.GET(0, 640, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackLeft = new ƒAid.SpriteSheetAnimation("AttackLeft", coat);
-            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 128, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
+            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 0, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackUp = new ƒAid.SpriteSheetAnimation("AttackUp", coat);
             this.animAttackUp.generateByGrid(ƒ.Rectangle.GET(0, 896, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackDown = new ƒAid.SpriteSheetAnimation("AttackDown", coat);
@@ -1010,6 +1010,11 @@ var Dungeon;
             }
             Dungeon.avatar.act(run ? Dungeon.ACTION.SPRINT_DOWN : Dungeon.ACTION.WALK_DOWN);
         }
+        /* // For testing purposes-
+        else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E, ƒ.KEYBOARD_CODE.ARROW_DOWN])){
+          resetGame(false)
+        }
+        */
         else {
             Dungeon.avatar.act(Dungeon.ACTION.IDLE);
             Dungeon.animateLightRotation();
@@ -1063,17 +1068,11 @@ var Dungeon;
     // Reset all global-Variables
     function resetGame(won) {
         if (won) {
+            window.location.href = "../../won.html";
         }
         else {
+            window.location.href = "../../gameover.html";
         }
-        // Read settings-json
-        // Set/reset global-Variables
-        // delete Map
-        // Delete Enemys
-        // Delete Items
-        // Reset HUD
-        // reset Stamina
-        // reset battery
     }
     Dungeon.resetGame = resetGame;
     // Resets only the level
@@ -1083,17 +1082,12 @@ var Dungeon;
         enemy_graph.removeAllChildren();
         // Delete Items
         // Remove ExitGate
-        //resetExitGate()
-        // Reset HUD
-        // reset Stamina
         Dungeon.setExitGate();
-        // reset battery
+        // Update HUD
     }
     // Set next Level and increase difficulty
     function nextLevel() {
-        console.log("before player", Dungeon.avatar.mtxLocal.translation);
         Dungeon.placePlayer();
-        console.log("after palyer", Dungeon.avatar.mtxLocal.translation);
         resetLevel();
         Dungeon.LEVEL += 1;
         Dungeon.createEnemy();

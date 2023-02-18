@@ -215,7 +215,7 @@ namespace Dungeon {
             this.animAttackRight = new ƒAid.SpriteSheetAnimation("AttackRight", coat);
             this.animAttackRight.generateByGrid(ƒ.Rectangle.GET(0,640, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackLeft = new ƒAid.SpriteSheetAnimation("AttackLeft", coat);
-            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 128, 128, 28), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
+            this.animAttackLeft.generateByGrid(ƒ.Rectangle.GET(0, 0, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackUp = new ƒAid.SpriteSheetAnimation("AttackUp", coat);
             this.animAttackUp.generateByGrid(ƒ.Rectangle.GET(0, 896, 128, 128), 5, 128, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(128));
             this.animAttackDown = new ƒAid.SpriteSheetAnimation("AttackDown", coat);

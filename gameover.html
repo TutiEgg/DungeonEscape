@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Verloren!</title>
+    <style>
+      /* CSS für die Animation */
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      h1 {
+        color: #f00;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      /* CSS für den Button */
+      button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+      body{
+        background: url("/Assets/Images/gameover.jpg");
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>Game Over!</h1>
+    <button onclick="location.href='../'">erneut Spielen ?</button>
+  </body>
+</html>

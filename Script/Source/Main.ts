@@ -192,6 +192,11 @@ namespace Dungeon {
       }
       avatar.act(run ? ACTION.SPRINT_DOWN : ACTION.WALK_DOWN);
     }
+    /* // For testing purposes-
+    else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E, ƒ.KEYBOARD_CODE.ARROW_DOWN])){
+      resetGame(false)
+    }
+    */
     else{  
       avatar.act(ACTION.IDLE);
       animateLightRotation()
@@ -264,24 +269,10 @@ namespace Dungeon {
 // Reset all global-Variables
 export function resetGame(won: boolean): void {
   if (won) {
-
+    window.location.href = "../../won.html";
   } else {
-
+    window.location.href = "../../gameover.html";
   }
-  // Read settings-json
-  // Set/reset global-Variables
-
-  // delete Map
-
-
-  // Delete Enemys
-
-  // Delete Items
-
-  // Reset HUD
-      // reset Stamina
-      // reset battery
-  
 }
 
 // Resets only the level
@@ -291,18 +282,16 @@ function resetLevel(): void {
   enemy_graph.removeAllChildren();
   // Delete Items
   // Remove ExitGate
-  //resetExitGate()
-  // Reset HUD
-      // reset Stamina
   setExitGate()
-      // reset battery
+  // Update HUD
+  
 } 
 
 // Set next Level and increase difficulty
 export function nextLevel(): void {
-  console.log("before player", avatar.mtxLocal.translation)
+  
   placePlayer();
-  console.log("after palyer", avatar.mtxLocal.translation)
+  
   resetLevel();
   LEVEL += 1;
   
