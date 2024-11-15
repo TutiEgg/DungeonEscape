@@ -24,9 +24,6 @@
 
 ## General Information
 - Author: Luce.Moser
-- Semester: WI2022/2023 (5.Semester)
-- Kurs: Prototyping Interaktiver Medien-Apps und Games
-- Docent: Prof. Jirka Dell´Oro-Friedl
 
 
 ## How to Use
